@@ -1,55 +1,52 @@
-import React, {useState, useEffect} from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux'
 import CaredsList from '../components/CaredsList';
 import SearchBox from '../components/SearchBox';
 import 'tachyons'
-// import {no} from './NoOfRobots'
 import './App.css'
 import Scroll from '../components/Scroll'
+import { setSearchField, requestRobots } from '../action'
 
-
-const App = () =>{
-
-  // constructor(){
-  //   super();
-  //   this.state = {
-  //     searchr : '',
-  //     robo   : [],
-  //   }
-  // };
-
-  const [robo, setRobo] = useState([]);
-  const [searchr,setSearchr] = useState('');
-
-  // componentDidMount(){
+const mapStateToProps = (state) => {
+  return {
+    searchField: state.searchRobots.searchField,
+    robots: state.requestRobots.robots,
+    isPending: state.requestRobots.isPending,
+    error: state.requestRobots.error,
     
-  //   fetch("https://jsonplaceholder.typicode.com/users").then(res => res.json())
-  //   .then(data=>{
-  //       this.setState({robo : data})
-  //   })
+  }
+}
 
-  // }
+const mapDispatchToProps = (dispatch) => {
+  return {
+    onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+    onRequestRobots : () => dispatch(requestRobots()),
+  }
+}
 
+const App = (props) =>{
+
+  // const [robots, setRobo] = useState([]);
+  const { searchField, onSearchChange, robots, onRequestRobots, isPending  } = props;
+
+  
   useEffect(()=>{
-    fetch("https://jsonplaceholder.typicode.com/users")
-      .then(res => res.json())
-      .then(data=> setRobo(data))
+    onRequestRobots()
   },[])
 
-  // on change event function for serchbox
- const changee=(event)=>{
-    setSearchr(event.target.value);       
-  }
+  
   
     
-  let filterrobo = robo.filter(robot=>{
-    return robot.name.toLowerCase().includes(searchr.toLowerCase())
-    })
-    if(robo.length !==0)
+  let filterrobo = robots.filter(robot => {
+     return robot.name.toLowerCase().includes(searchField.toLowerCase())
+   })
+  
+    if(!isPending)
     {
     return(
       <div className="tc">
         <h1 className="f1">robots</h1>
-        <SearchBox fun = {changee}/>
+        <SearchBox fun = {onSearchChange}/>
         <Scroll>
 
           <CaredsList no={filterrobo}/>
@@ -63,4 +60,4 @@ const App = () =>{
   
 }
 
-export default App
+export default connect(mapStateToProps, mapDispatchToProps)(App) 
